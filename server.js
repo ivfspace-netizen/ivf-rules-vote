@@ -19,6 +19,9 @@ http.createServer((req,res)=>{
    if(votes[k])return send(res,409,{});            // 중복투표 차단
    votes[k]={region,name,a1:v.a1,a2:v.a2,at:Date.now()};save();send(res,200,{ok:true});
   }catch(e){send(res,400,{})}});return}
+ if(req.method==="POST"&&u.pathname==="/api/reset"){
+  if(!KEY||u.searchParams.get("key")!==KEY)return send(res,403,{});   // 관리자만
+  votes={};save();return send(res,200,{ok:true})}
  if(u.pathname==="/api/results"){
   if(!KEY||u.searchParams.get("key")!==KEY)return send(res,403,{});   // 관리자만
   return send(res,200,Object.values(votes))}
