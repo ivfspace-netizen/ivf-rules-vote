@@ -3,7 +3,7 @@
 const http=require("http"),fs=require("fs"),path=require("path");
 const PORT=process.env.PORT||3000,KEY=process.env.ADMIN_KEY||"";
 const FILE=process.env.DATA_FILE||path.join(__dirname,"votes.json");
-const OK=["찬성","반대","기권"];
+const OK=["찬성","반대"];
 const newEpoch=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,8);
 let db={epoch:newEpoch(),votes:{}};   // epoch: 초기화할 때마다 바뀌는 투표 회차 번호
 try{const d=JSON.parse(fs.readFileSync(FILE,"utf8"));if(d&&d.votes&&d.epoch)db=d;else if(d)db.votes=d}catch(e){}
