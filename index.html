@@ -22,8 +22,7 @@ button{flex:1;padding:14px;font:inherit;font-weight:700;border-radius:4px;border
 .done{text-align:center;padding:24px 0}.done .ck{font-size:48px}
 </style></head><body><div class="w">
 <h1>IVF 간사 규정집 개정안 투표</h1>
-<div class="card" id="c"></div><p id="ad" style="text-align:center;margin-top:16px"><a href="#" id="al" style="color:var(--mu);font-size:13px">관리자</a></p></div>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<div class="card" id="c"></div></div>
 <script>
 const AG=[
 {t:"안건 1. 제3차 임기 신설",d:"제14조·제15조·제43조 개정"},
@@ -70,23 +69,6 @@ async function submit(){
  }catch(e){S.err="제출하지 못했습니다. 잠시 후 다시 시도해 주세요."}
  S.busy=false;render();
 }
-async function admin(){
- const key=prompt("관리자 비밀번호");if(!key)return;
- c.innerHTML='<div class="step">관리자</div><p class="q">투표 QR 코드와 결과표</p><div id="qr" style="display:flex;justify-content:center;padding:16px;background:#fff"></div><p style="font-size:13px;color:var(--mu);word-break:break-all;text-align:center">'+location.origin+'/</p><div id="rs">결과를 불러오는 중…</div><div class="row"><button class="sec" id="bk">투표 화면으로</button><button class="sec" id="rz" style="border-color:var(--p);color:var(--p)">모든 투표 삭제</button></div>';
- try{new QRCode(document.getElementById("qr"),{text:location.origin+"/",width:240,height:240})}catch(e){}
- document.getElementById("bk").onclick=()=>{S.step=0;render()};
- const rs=document.getElementById("rs");
- document.getElementById("rz").onclick=async()=>{if(prompt("모든 투표가 삭제되며 되돌릴 수 없습니다. 계속하려면 삭제 를 입력하세요.")!=="삭제")return;const q=await fetch("/api/reset?key="+encodeURIComponent(key),{method:"POST"});rs.textContent=q.ok?"모든 투표를 삭제했습니다. (총 0명)":"삭제하지 못했습니다."};
- try{
-  const r=await fetch("/api/results?key="+encodeURIComponent(key));
-  if(!r.ok){rs.textContent="비밀번호가 올바르지 않습니다.";return}
-  const rows=(await r.json()).sort((a,b)=>a.at-b.at);
-  const th="padding:8px;border:1px solid var(--bd);text-align:center";
-  const cnt=(k,l)=>rows.filter(x=>x[k]===l).length;
-  rs.innerHTML='<p class="q" style="margin-top:20px">결과표 (총 '+rows.length+'명 참여)</p><table style="width:100%;border-collapse:collapse;font-size:15px"><tr style="background:var(--gl)"><th style="'+th+'">안건</th><th style="'+th+'">찬성</th><th style="'+th+'">반대</th><th style="'+th+'">기권</th></tr>'+AG.map((a,i)=>'<tr><td style="'+th+'">'+a.t.split(".")[0]+'</td>'+OP.map(([l])=>'<td style="'+th+'">'+cnt("a"+(i+1),l)+'</td>').join("")+'</tr>').join("")+'</table><p class="q" style="margin-top:20px">투표자 명단</p><table style="width:100%;border-collapse:collapse;font-size:14px"><tr style="background:var(--gl)"><th style="'+th+'">소속 지방회</th><th style="'+th+'">이름</th><th style="'+th+'">안건 1</th><th style="'+th+'">안건 2</th></tr>'+rows.map(x=>'<tr><td style="'+th+'">'+esc(x.region)+'</td><td style="'+th+'">'+esc(x.name)+'</td><td style="'+th+'">'+x.a1+'</td><td style="'+th+'">'+x.a2+'</td></tr>').join("")+'</table>';
- }catch(e){rs.textContent="결과를 불러오지 못했습니다."}
-}
-document.getElementById("al").onclick=e=>{e.preventDefault();admin()};
 render();
 (async()=>{try{const e=(await(await fetch("/api/epoch")).json()).epoch,v=localStorage.getItem("voted");if(v&&v===e&&S.step===0){S.step=4;render()}else if(v&&v!==e)localStorage.removeItem("voted")}catch(x){}})();
 </script></body></html>

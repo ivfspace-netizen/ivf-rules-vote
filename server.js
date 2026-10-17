@@ -30,6 +30,7 @@ http.createServer((req,res)=>{
  if(u.pathname==="/api/results"){
   if(!admin(u))return send(res,403,{});               // 관리자만
   return send(res,200,Object.values(db.votes))}
+ const page=u.pathname==="/admin"?"admin.html":"index.html";     // 관리자 페이지는 /admin 에서만 열림(비밀번호 필요)
  res.writeHead(200,{"Content-Type":"text/html; charset=utf-8"});
- res.end(fs.readFileSync(path.join(__dirname,"index.html")));
+ res.end(fs.readFileSync(path.join(__dirname,page)));
 }).listen(PORT,()=>console.log("listening "+PORT));
