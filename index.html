@@ -25,35 +25,36 @@ button{flex:1;padding:14px;font:inherit;font-weight:700;border-radius:4px;border
 <div class="card" id="c"></div><p style="text-align:center;margin-top:16px"><a href="/admin" style="color:var(--mu);font-size:13px">관리자</a></p></div>
 <script>
 const AG=[
-{t:"안건 1. 제3차 임기 신설",d:"제14조·제15조·제43조 개정"},
-{t:"안건 2. 출산전후휴가 중 연수 기간 변경",d:"별칙 제6호 제13조 신설"}];
+{t:"안건 1. 제3차 임기제 신설",d:"제14조·제15조·제43조 개정"},
+{t:"안건 2. 출산전후휴가 중 연수 기간 연장 신설",d:"별칙 제6호 제13조 신설"},
+{t:"안건 3. 활동학사를 인턴간사제도로 전환",d:"별정직 직원 근무규정 개정, 별칙 제8호 제2절"}];
 const OP=[["찬성","yes"],["반대","no"],["기권","ab"]];
-const S={step:0,region:"",name:"",v:[null,null],err:"",busy:false};
+const S={step:0,region:"",name:"",v:[null,null,null],err:"",busy:false};
 const c=document.getElementById("c");
 const esc=s=>s.replace(/[&<>"]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m]));
 function hash(s){let h=5381;for(const ch of s)h=((h<<5)+h+ch.codePointAt(0))>>>0;return"v"+h.toString(36)}
 function render(){
  if(S.step===0){
-  c.innerHTML=`<div class="step">1 / 4 · 투표자 정보</div><p class="q">소속 지방회와 이름을 입력해 주세요.</p>
+  c.innerHTML=`<div class="step">1 / 5 · 투표자 정보</div><p class="q">소속 지방회와 이름을 입력해 주세요.</p>
   <label for="r">소속 지방회</label><input type="text" id="r" value="${esc(S.region)}" autocomplete="off">
   <label for="n">이름</label><input type="text" id="n" value="${esc(S.name)}" autocomplete="off">
   <div class="err">${S.err}</div><div class="row"><button class="pri" id="nx">다음</button></div>`;
   document.getElementById("nx").onclick=()=>{S.region=document.getElementById("r").value.trim();S.name=document.getElementById("n").value.trim();
    if(!S.region||!S.name){S.err="소속 지방회와 이름을 모두 입력해 주세요.";render();return}S.err="";S.step=1;render()}
- }else if(S.step<=2){
+ }else if(S.step<=3){
   const i=S.step-1,a=AG[i];
-  c.innerHTML=`<div class="step">${S.step+1} / 4 · ${a.t.split(".")[0]}</div><p class="q">${a.t}<br><span style="font-size:14px;font-weight:400;color:var(--mu)">${a.d}</span></p>
+  c.innerHTML=`<div class="step">${S.step+1} / 5 · ${a.t.split(".")[0]}</div><p class="q">${a.t}<br><span style="font-size:14px;font-weight:400;color:var(--mu)">${a.d}</span></p>
   <p style="font-size:14px;color:var(--mu);margin:0 0 14px">위 안건에 대한 의견을 선택해 주세요.</p>
   <div class="opts">${OP.map(([l,k])=>`<label class="opt ${k} ${S.v[i]===l?"on":""}" style="margin:0"><input type="radio" name="o" value="${l}" ${S.v[i]===l?"checked":""}>${l}</label>`).join("")}</div>
-  <div class="row"><button class="sec" id="pv">이전</button><button class="pri" id="nx" ${S.v[i]?"":"disabled"}>${S.step===2?"확인":"다음"}</button></div>`;
+  <div class="row"><button class="sec" id="pv">이전</button><button class="pri" id="nx" ${S.v[i]?"":"disabled"}>${S.step===3?"확인":"다음"}</button></div>`;
   c.querySelectorAll("input[name=o]").forEach(x=>x.onchange=()=>{S.v[i]=x.value;render()});
   document.getElementById("pv").onclick=()=>{S.step--;render()};
   document.getElementById("nx").onclick=()=>{S.step++;render()};
- }else if(S.step===3){
-  c.innerHTML=`<div class="step">4 / 4 · 제출 확인</div><p class="q">투표 내용을 확인해 주세요.</p>
+ }else if(S.step===4){
+  c.innerHTML=`<div class="step">5 / 5 · 제출 확인</div><p class="q">투표 내용을 확인해 주세요.</p>
   <div class="sum"><p><b>소속 지방회</b> ${esc(S.region)}<br><b>이름</b> ${esc(S.name)}</p>${AG.map((a,i)=>`<p><b>${a.t}</b><br>${S.v[i]}</p>`).join("")}</div>
   <div class="err">${S.err}</div><div class="row"><button class="sec" id="pv">이전</button><button class="pri" id="sb" ${S.busy?"disabled":""}>투표 제출하기</button></div>`;
-  document.getElementById("pv").onclick=()=>{S.step=2;render()};
+  document.getElementById("pv").onclick=()=>{S.step=3;render()};
   document.getElementById("sb").onclick=submit;
  }else{
   c.innerHTML=`<div class="done"><div class="ck">✅</div><p class="q">투표가 제출되었습니다.<br>참여해 주셔서 감사합니다.</p></div>`;
@@ -62,13 +63,13 @@ function render(){
 async function submit(){
  S.busy=true;S.err="";render();
  try{
-  const r=await fetch("/api/vote",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({region:S.region,name:S.name,a1:S.v[0],a2:S.v[1]})});
-  if(r.status===409){S.err="같은 소속 지방회·이름으로 이미 투표가 제출되었습니다.";S.step=3}
+  const r=await fetch("/api/vote",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({region:S.region,name:S.name,a1:S.v[0],a2:S.v[1],a3:S.v[2]})});
+  if(r.status===409){S.err="같은 소속 지방회·이름으로 이미 투표가 제출되었습니다.";S.step=4}
   else if(!r.ok)throw new Error("fail");
-  else{const j=await r.json();try{localStorage.setItem("voted",j.epoch)}catch(e){}S.step=4}
+  else{const j=await r.json();try{localStorage.setItem("voted",j.epoch)}catch(e){}S.step=5}
  }catch(e){S.err="제출하지 못했습니다. 잠시 후 다시 시도해 주세요."}
  S.busy=false;render();
 }
 render();
-(async()=>{try{const e=(await(await fetch("/api/epoch")).json()).epoch,v=localStorage.getItem("voted");if(v&&v===e&&S.step===0){S.step=4;render()}else if(v&&v!==e)localStorage.removeItem("voted")}catch(x){}})();
+(async()=>{try{const e=(await(await fetch("/api/epoch")).json()).epoch,v=localStorage.getItem("voted");if(v&&v===e&&S.step===0){S.step=5;render()}else if(v&&v!==e)localStorage.removeItem("voted")}catch(x){}})();
 </script></body></html>

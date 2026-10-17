@@ -18,10 +18,10 @@ http.createServer((req,res)=>{
   let b="";req.on("data",d=>{b+=d;if(b.length>5000)req.destroy()});
   req.on("end",()=>{try{
    const v=JSON.parse(b),region=String(v.region||"").trim().slice(0,40),name=String(v.name||"").trim().slice(0,40);
-   if(!region||!name||!OK.includes(v.a1)||!OK.includes(v.a2))return send(res,400,{});
+   if(!region||!name||!OK.includes(v.a1)||!OK.includes(v.a2)||!OK.includes(v.a3))return send(res,400,{});
    const k=norm(region)+"|"+norm(name);
    if(db.votes[k])return send(res,409,{});            // 중복투표 차단
-   db.votes[k]={region,name,a1:v.a1,a2:v.a2,at:Date.now()};save();send(res,200,{ok:true,epoch:db.epoch});
+   db.votes[k]={region,name,a1:v.a1,a2:v.a2,a3:v.a3,at:Date.now()};save();send(res,200,{ok:true,epoch:db.epoch});
   }catch(e){send(res,400,{})}});return}
  if(req.method==="POST"&&u.pathname==="/api/reset"){
   if(!admin(u))return send(res,403,{});               // 관리자만
