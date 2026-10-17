@@ -20,9 +20,8 @@ button{flex:1;padding:14px;font:inherit;font-weight:700;border-radius:4px;border
 .done{text-align:center;padding:24px 0}.done .ck{font-size:48px}
 </style></head><body><div class="w">
 <h1>관리자 페이지</h1><p class="sub">IVF 간사 규정집 개정안 투표</p><div class="card" id="c"></div></div>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script>
-const AG=["안건 1","안건 2","안건 3"],OP=["찬성","반대","기권"];
+const AG=["안건 1","안건 2","안건 3"],OP=["찬성","반대"];
 const c=document.getElementById("c");let key="";
 const esc=s=>String(s).replace(/[&<>"]/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[m]));
 function login(msg){
@@ -35,11 +34,10 @@ async function load(){
  try{const r=await fetch("/api/results?key="+encodeURIComponent(key));if(!r.ok){login("비밀번호가 올바르지 않습니다.");return}rows=(await r.json()).sort((a,b)=>a.at-b.at)}
  catch(e){login("불러오지 못했습니다. 잠시 후 다시 시도해 주세요.");return}
  const th="padding:8px;border:1px solid var(--bd);text-align:center",cnt=(k,l)=>rows.filter(x=>x[k]===l).length;
- c.innerHTML='<p class="q">투표 QR 코드</p><div id="qr" style="display:flex;justify-content:center;padding:16px;background:#fff"></div><p style="font-size:13px;color:var(--mu);word-break:break-all;text-align:center">'+location.origin+'/</p>'
+ c.innerHTML=''
  +'<p class="q" style="margin-top:20px">결과표 (총 '+rows.length+'명 참여)</p><table style="width:100%;border-collapse:collapse;font-size:15px"><tr style="background:var(--gl)"><th style="'+th+'">안건</th>'+OP.map(l=>'<th style="'+th+'">'+l+'</th>').join("")+'</tr>'+AG.map((a,i)=>'<tr><td style="'+th+'">'+a+'</td>'+OP.map(l=>'<td style="'+th+'">'+cnt("a"+(i+1),l)+'</td>').join("")+'</tr>').join("")+'</table>'
  +'<p class="q" style="margin-top:20px">투표자 명단</p><table style="width:100%;border-collapse:collapse;font-size:14px"><tr style="background:var(--gl)"><th style="'+th+'">소속 지방회</th><th style="'+th+'">이름</th><th style="'+th+'">안건 1</th><th style="'+th+'">안건 2</th><th style="'+th+'">안건 3</th></tr>'+rows.map(x=>'<tr><td style="'+th+'">'+esc(x.region)+'</td><td style="'+th+'">'+esc(x.name)+'</td><td style="'+th+'">'+x.a1+'</td><td style="'+th+'">'+x.a2+'</td><td style="'+th+'">'+x.a3+'</td></tr>').join("")+'</table>'
  +'<div class="row"><button class="pri" id="rf">새로고침</button><button class="sec" id="rz" style="border-color:var(--p);color:var(--p)">모든 투표 삭제</button></div><div class="err" id="m"></div>';
- try{new QRCode(document.getElementById("qr"),{text:location.origin+"/",width:240,height:240})}catch(e){}
  document.getElementById("rf").onclick=load;
  document.getElementById("rz").onclick=async()=>{
   if(prompt("모든 투표와 중복투표 기록이 삭제되며 되돌릴 수 없습니다. 계속하려면 삭제 를 입력하세요.")!=="삭제")return;
